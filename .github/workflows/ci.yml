@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-24.04
+    env:
+      MARIADB_VERSION: '11.4.9'
+      SDK_REF: 'main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: exasol-labs/exasol-gateway-sdk
+          ref: ${{ env.SDK_REF }}
+          path: exasol-gateway-sdk
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            bison ca-certificates cmake flex g++ gcc git libaio-dev libcurl4-openssl-dev \
+            libevent-dev libgtest-dev libncurses-dev libssl-dev libxml2-dev lsb-release \
+            ninja-build pkg-config wget zlib1g-dev
+          wget --quiet "https://packages.apache.org/artifactory/arrow/ubuntu/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb"
+          sudo apt-get install --yes ./apache-arrow-apt-source-latest-*.deb
+          sudo apt-get update
+          sudo apt-get install --yes libarrow-dev
+      - name: Build, test, and install SDK
+        run: |
+          cmake -S exasol-gateway-sdk -B build-sdk -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/sdk-install"
+          cmake --build build-sdk
+          ctest --test-dir build-sdk --output-on-failure
+          cmake --install build-sdk
+      - name: Check out supported MariaDB source
+        run: |
+          git clone --depth 1 --branch "mariadb-${MARIADB_VERSION}" \
+            https://github.com/MariaDB/server.git mariadb
+      - name: Configure MariaDB with external plugin
+        run: |
+          ./tools/configure_mariadb.sh \
+            "${{ github.workspace }}/mariadb" \
+            "${{ github.workspace }}/build-mariadb" \
+            "${{ github.workspace }}/sdk-install" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_UNIT_TESTS=OFF \
+            -DWITH_ROCKSDB=OFF \
+            -DWITH_INNOBASE_STORAGE_ENGINE=OFF
+      - name: Build plugin
+        run: ./tools/build_plugin.sh "${{ github.workspace }}/build-mariadb" 2
+      - name: Verify plugin boundary
+        run: |
+          plugin="${{ github.workspace }}/build-mariadb/storage/exasol_gw/ha_exasol_gw.so"
+          test -f "$plugin"
+          readelf -d "$plugin" | grep -F 'libSessionGatewaySdk.so.0'
+          if readelf -d "$plugin" | grep -Eq '\((RPATH|RUNPATH)\)'; then
+            echo 'Plugin contains a build-tree RPATH/RUNPATH' >&2
+            exit 1
+          fi
+          if grep -R -nE '#include[[:space:]]*[<"](arrow/|[^>"]*(DBTable|DMP|DTM))' plugin --include='*.cc' --include='*.h'; then
+            echo 'Plugin crossed its public SDK C ABI boundary' >&2
+            exit 1
+          fi
+      - name: Package version-specific plugin
+        run: |
+          ./tools/package_plugin.sh \
+            "${{ github.workspace }}/build-mariadb/storage/exasol_gw/ha_exasol_gw.so" \
+            "${{ github.workspace }}/dist" \
+            "0.1.0-${GITHUB_SHA::12}" "$MARIADB_VERSION" "$SDK_REF"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mariadb-exasol-gateway-${{ env.MARIADB_VERSION }}
+          path: dist/*
+          if-no-files-found: error

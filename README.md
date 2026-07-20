@@ -10,7 +10,8 @@ CREATE TABLE example (...) ENGINE=EXASOL;
 
 > **Status:** `0.x` preview. The initial supported server line is MariaDB 11.4
 > LTS. A plugin binary must be built and packaged for the exact supported
-> MariaDB server ABI; compatibility across server versions is not assumed.
+> MariaDB server ABI; compatibility across server versions is not assumed. See
+the [compatibility matrix](docs/compatibility.md).
 
 ## Source boundaries
 

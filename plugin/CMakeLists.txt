@@ -1,5 +1,5 @@
 OPTION(WITH_EXASOL_GW_STORAGE_ENGINE
-  "Build the Exasol Gateway proxy storage engine plugin (ha_exasol_gw.so)" OFF)
+  "Build the Exasol Gateway proxy storage engine plugin (ha_exasol_gw.so)" ON)
 
 IF(NOT WITH_EXASOL_GW_STORAGE_ENGINE)
   SET(PLUGIN_exasol_gw NO CACHE STRING "How to build plugin exasol_gw" FORCE)
@@ -39,3 +39,6 @@ SET(EXASOL_GW_SOURCES
 
 MYSQL_ADD_PLUGIN(exasol_gw ${EXASOL_GW_SOURCES} STORAGE_ENGINE MODULE_ONLY
   LINK_LIBRARIES ExasolGateway::C)
+# Distribution packages resolve the SDK through the system loader configuration;
+# never embed a developer SDK prefix in the plugin binary.
+SET_TARGET_PROPERTIES(exasol_gw PROPERTIES SKIP_BUILD_RPATH TRUE)
