@@ -4,7 +4,7 @@
 
 | Plugin line | MariaDB source line | Exasol Gateway SDK | Protocol |
 |---|---|---|---|
-| `0.1.x` preview | `11.4.x` LTS (CI baseline `11.4.9`) | `0.1.x` / `libSessionGatewaySdk.so.0` | SessionGateway v1 with negotiated capabilities |
+| `0.1.x` preview | `11.4.x` LTS (CI baseline `11.4.9`) | CI pin `v0.1.0-alpha.1` / `libSessionGatewaySdk.so.0` | SessionGateway v1 with negotiated capabilities |
 
 MariaDB storage-engine APIs and binary layouts are not stable across arbitrary
 server releases. Build and package `ha_exasol_gw.so` for the exact MariaDB
