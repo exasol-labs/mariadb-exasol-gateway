@@ -1,0 +1,12 @@
+Exasol Gateway Storage Engine for MariaDB
+Copyright (c) 2026 Exasol Labs
+
+This source is licensed under GPL-2.0-only.
+
+It is designed to build with:
+- MariaDB Server, GPL-2.0-only
+- Exasol Gateway SDK, MIT
+
+The SDK has runtime dependencies including Apache Arrow and OpenSSL under their
+respective licenses. Distributors must perform license review for the complete
+binary package and retain all applicable notices.

@@ -1,0 +1,6 @@
+build/
+build-*/
+sdk-install/
+mariadb/
+compile_commands.json
+*.swp
