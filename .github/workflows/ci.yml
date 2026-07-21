@@ -81,7 +81,7 @@ jobs:
             "$MARIADB_VERSION" "$sdk_commit" "$PLATFORM" "$ARCH"
           archive=$(echo dist/*.tar.gz)
           checksum=$(echo dist/*.tar.gz.sha256)
-          sha256sum --check "$checksum"
+          (cd dist && sha256sum --check "$(basename "$checksum")")
           mkdir extracted
           tar -xzf "$archive" -C extracted
           packaged_plugin=$(find extracted -name ha_exasol_gw.so -print -quit)
