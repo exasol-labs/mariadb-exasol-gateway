@@ -39,6 +39,17 @@ SET(EXASOL_GW_SOURCES
 
 MYSQL_ADD_PLUGIN(exasol_gw ${EXASOL_GW_SOURCES} STORAGE_ENGINE MODULE_ONLY
   LINK_LIBRARIES ExasolGateway::C)
-# Distribution packages resolve the SDK through the system loader configuration;
-# never embed a developer SDK prefix in the plugin binary.
-SET_TARGET_PROPERTIES(exasol_gw PROPERTIES SKIP_BUILD_RPATH TRUE)
+
+OPTION(EXASOL_GW_PACKAGE_RPATH
+  "Use the relocatable runtime path required by the release package" OFF)
+IF(EXASOL_GW_PACKAGE_RPATH)
+  # DT_RPATH is intentional: the SDK's Arrow dependency is staged beside the
+  # module and must also be found by the loader.
+  TARGET_LINK_OPTIONS(exasol_gw PRIVATE "-Wl,--disable-new-dtags")
+  SET_TARGET_PROPERTIES(exasol_gw PROPERTIES
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH "$ORIGIN")
+ELSE()
+  # Developer builds must not retain a local SDK prefix.
+  SET_TARGET_PROPERTIES(exasol_gw PROPERTIES SKIP_BUILD_RPATH TRUE)
+ENDIF()

@@ -24,6 +24,16 @@ The plugin consumes only the SDK's stable `sessiongw_c_*` C ABI through
 `ExasolGateway::C`. It does not include Arrow C++ or Exasol server-private
 headers.
 
+## Install a release package
+
+A manually dispatched GitHub workflow builds the pinned Ubuntu 24.04 amd64 /
+MariaDB 11.4.9 artifact, runs the available SDK unit tests, packages the plugin
+with its SDK and Arrow C++ runtime, and uploads a checksum-protected artifact.
+It can optionally publish that artifact as a GitHub Release. See
+[the release-package installation guide](docs/install.md) before downloading;
+the archive is ABI-specific and is not interchangeable across MariaDB or OS
+versions.
+
 ## Build
 
 Install Exasol Gateway SDK first, then obtain a clean MariaDB source checkout:
@@ -66,10 +76,11 @@ only for isolated tests. See [identity and audit mapping](docs/identity.md) and
 
 ## Testing
 
-Public CI builds the plugin against a clean pinned MariaDB checkout and an
-installed public SDK. The integration workload under `plugin/test/` additionally
-requires an Exasol/Nano server harness and is run by the protected internal
-end-to-end gate.
+The manually dispatched package workflow builds the plugin against a clean,
+pinned MariaDB checkout, runs the available public SDK unit tests, and verifies
+the packaged loader closure. The integration workload under `plugin/test/`
+additionally requires an Exasol/Nano server harness; it is intentionally not
+part of the package workflow and remains a protected end-to-end gate.
 
 ## License
 
