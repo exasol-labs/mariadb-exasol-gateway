@@ -49,6 +49,14 @@ The package uses only the relocatable loader path `$ORIGIN`; the three bundled
 libraries must remain together in MariaDB's plugin directory. The normal
 Ubuntu base runtime remains an operating-system prerequisite.
 
+The preview engine is marked `experimental` by MariaDB. Add this server option
+before loading it (for example, in the MariaDB configuration under `[mariadbd]`)
+and restart the service:
+
+```text
+plugin_maturity=experimental
+```
+
 Verify that MariaDB can load the plugin:
 
 ```sql
