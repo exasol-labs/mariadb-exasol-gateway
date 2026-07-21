@@ -90,7 +90,7 @@ jobs:
           readelf -d "$packaged_plugin" | grep -F 'Library rpath: [$ORIGIN]'
           ldd "$packaged_plugin" | tee packaged-ldd.txt
           ! grep -F 'not found' packaged-ldd.txt
-          ! grep -F "${{ github.workspace }}" packaged-ldd.txt
+          ! readelf -d "$packaged_plugin" | grep -F "$GITHUB_WORKSPACE"
       - uses: actions/upload-artifact@v4
         with:
           name: mariadb-exasol-gateway-${{ env.MARIADB_VERSION }}-${{ env.PLATFORM }}-${{ env.ARCH }}
