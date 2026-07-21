@@ -695,6 +695,10 @@ expect_handler_unsupported "unsupported binary string" \
     "USE $SCHEMA; CREATE TABLE BAD_BINARY(B BINARY(8)) ENGINE=EXASOL"
 expect_handler_unsupported "unsupported multi-bit value" \
     "USE $SCHEMA; CREATE TABLE BAD_BIT(B BIT(2)) ENGINE=EXASOL"
+expect_handler_unsupported "unsupported unsigned BIGINT" \
+    "USE $SCHEMA; CREATE TABLE BAD_UNSIGNED_BIGINT(ID BIGINT UNSIGNED) ENGINE=EXASOL"
+expect_handler_unsupported "unsupported DECIMAL precision" \
+    "USE $SCHEMA; CREATE TABLE BAD_DECIMAL_PRECISION(D DECIMAL(37,0)) ENGINE=EXASOL"
 expect_handler_unsupported "unsupported explicit table charset" \
     "USE $SCHEMA; CREATE TABLE BAD_CHARSET(V VARCHAR(8)) ENGINE=EXASOL DEFAULT CHARSET=latin1"
 expect_handler_unsupported "unsupported per-column charset" \
