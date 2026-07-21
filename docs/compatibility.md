@@ -4,7 +4,7 @@
 
 | Plugin line | MariaDB source line | Exasol Gateway SDK | Protocol |
 |---|---|---|---|
-| `0.1.x` preview | `11.4.x` LTS (CI baseline `11.4.9`) | CI pin `v0.1.0-alpha.1` / `libSessionGatewaySdk.so.0` | SessionGateway v1 with negotiated capabilities |
+| `0.1.x` preview | `11.4.x` LTS (CI baseline `11.4.9`) | SDK default branch at workflow run time; exact commit in `MANIFEST.txt` / `libSessionGatewaySdk.so.0` | SessionGateway v1 with negotiated capabilities |
 
 MariaDB storage-engine APIs and binary layouts are not stable across arbitrary
 server releases. Build and package `ha_exasol_gw.so` for the exact MariaDB
@@ -41,7 +41,7 @@ create or partially mutate a remote Exasol table.
 
 ## Update process
 
-1. Update the pinned SDK release in CI and run SDK unit/install consumers.
+1. Run the package workflow against the SDK default branch and record its exact commit in the artifact manifest.
 2. Build against a clean supported MariaDB tag.
 3. Run the public mock/build boundary checks.
 4. Run the protected live Exasol integration workload.

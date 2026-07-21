@@ -77,8 +77,9 @@ only for isolated tests. See [identity and audit mapping](docs/identity.md) and
 ## Testing
 
 The manually dispatched package workflow builds the plugin against a clean,
-pinned MariaDB checkout, runs the available public SDK unit tests, and verifies
-the packaged loader closure. The integration workload under `plugin/test/`
+pinned MariaDB checkout and the SDK repository's default branch at run time,
+runs the available public SDK unit tests, and verifies the packaged loader
+closure. The integration workload under `plugin/test/`
 additionally requires an Exasol/Nano server harness; it is intentionally not
 part of the package workflow and remains a protected end-to-end gate.
 
