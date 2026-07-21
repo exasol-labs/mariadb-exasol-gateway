@@ -556,10 +556,22 @@ CHARSET_INFO *declared_field_charset(Field *field, Create_field *create_field)
   return create_field && create_field->charset ? create_field->charset : field->charset();
 }
 
+bool charset_name_equals(const LEX_CSTRING &left, const LEX_CSTRING &right)
+{
+  return left.length == right.length && left.str && right.str &&
+         std::memcmp(left.str, right.str, left.length) == 0;
+}
+
 bool is_supported_exasol_string_collation(const CHARSET_INFO *charset,
                                            const CHARSET_INFO *implicit_collation)
 {
-  return charset && charset == implicit_collation && charset->cs_name.str &&
+  // MariaDB 11.4 can materialize the field and table-default collation through
+  // distinct CHARSET_INFO instances. Compare their stable names instead of
+  // their addresses, while still rejecting explicit non-default/binary forms.
+  return charset && implicit_collation &&
+         charset_name_equals(charset->cs_name, implicit_collation->cs_name) &&
+         charset_name_equals(charset->coll_name, implicit_collation->coll_name) &&
+         charset->cs_name.str &&
          std::string(charset->cs_name.str, charset->cs_name.length) == "utf8mb4" &&
          (charset->state & MY_CS_BINSORT) == 0;
 }
