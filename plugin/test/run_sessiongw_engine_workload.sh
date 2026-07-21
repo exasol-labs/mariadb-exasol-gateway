@@ -358,6 +358,7 @@ LD_LIBRARY_PATH="$SESSIONGATEWAY_SDK_RUNTIME_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY
     --port=0 --skip-networking \
     --plugin-dir="$MARIADB_BUILD/storage/exasol_gw" \
     --plugin-maturity=experimental \
+    --character-set-server=utf8mb4 --collation-server=utf8mb4_uca1400_ai_ci \
     --plugin-load-add=ha_exasol_gw.so \
     --log-error="$MDB/mariadb.err" --skip-grant-tables --local-infile=1 --user="$(id -un)" \
     >"$MDB/stdout.log" 2>&1 &

@@ -55,7 +55,14 @@ and restart the service:
 
 ```text
 plugin_maturity=experimental
+character_set_server=utf8mb4
+collation_server=utf8mb4_uca1400_ai_ci
 ```
+
+The plugin's supported string mapping is UTF-8 only. The explicit server
+charset/collation settings ensure unqualified `VARCHAR` and `CHAR` definitions
+use the supported MariaDB 11.4 default; binary, Latin-1, and other explicit
+collations remain rejected.
 
 Verify that MariaDB can load the plugin:
 
