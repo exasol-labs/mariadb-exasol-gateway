@@ -567,13 +567,17 @@ bool is_supported_exasol_string_collation(const CHARSET_INFO *charset,
 {
   // MariaDB 11.4 can materialize the field and table-default collation through
   // distinct CHARSET_INFO instances. Compare their stable names instead of
-  // their addresses, while still rejecting explicit non-default/binary forms.
+  // their addresses. MY_CS_BINSORT is also set for the 11.4 UCA default, so
+  // use the stable collation name to reject actual binary variants.
+  const std::string collation= charset && charset->coll_name.str
+                                   ? std::string(charset->coll_name.str, charset->coll_name.length)
+                                   : std::string();
   return charset && implicit_collation &&
          charset_name_equals(charset->cs_name, implicit_collation->cs_name) &&
          charset_name_equals(charset->coll_name, implicit_collation->coll_name) &&
          charset->cs_name.str &&
          std::string(charset->cs_name.str, charset->cs_name.length) == "utf8mb4" &&
-         (charset->state & MY_CS_BINSORT) == 0;
+         collation.find("_bin") == std::string::npos;
 }
 
 bool append_exasol_type(Field *field, Create_field *create_field,
