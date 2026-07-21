@@ -710,7 +710,9 @@ bool build_create_table_sql(TABLE *form, HA_CREATE_INFO *create_info,
       create_info && create_info->alter_info ? create_info->alter_info->create_list : empty_fields);
   const bool have_create_fields= create_info && create_info->alter_info;
   const CHARSET_INFO *implicit_collation=
-      form->in_use ? form->in_use->variables.collation_server : nullptr;
+      create_info && create_info->default_table_charset
+          ? create_info->default_table_charset
+          : (form->in_use ? form->in_use->variables.collation_server : nullptr);
   bool first= true;
   for (Field **field= form->field; *field; ++field)
   {
