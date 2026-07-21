@@ -75,5 +75,10 @@ EOF
 
 tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
     -C "$STAGE" -czf "$OUTPUT_DIR/$NAME.tar.gz" "$NAME"
-sha256sum "$OUTPUT_DIR/$NAME.tar.gz" > "$OUTPUT_DIR/$NAME.tar.gz.sha256"
+# The checksum file is distributed with the archive, so it must name the
+# archive relative to its download directory rather than this build machine.
+(
+    cd "$OUTPUT_DIR"
+    sha256sum "$NAME.tar.gz" > "$NAME.tar.gz.sha256"
+)
 echo "$OUTPUT_DIR/$NAME.tar.gz"
