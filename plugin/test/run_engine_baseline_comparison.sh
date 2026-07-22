@@ -306,14 +306,15 @@ report_bulk_lifecycle() {
         exit 1
     fi
 
-    local expected_batches=$(((BULK_LOAD_ROWS + BULK_LOAD_SESSIONGW_INSERT_BATCH_ROWS - 1) /
+    # The configured row count is a ceiling. The handler may lower its actual
+    # batch size when adaptive sizing accounts for the native frame shape.
+    local minimum_batches=$(((BULK_LOAD_ROWS + BULK_LOAD_SESSIONGW_INSERT_BATCH_ROWS - 1) /
         BULK_LOAD_SESSIONGW_INSERT_BATCH_ROWS))
     local key expected actual
-    for key in operations insert_rows insert_batches; do
+    for key in operations insert_rows; do
         case "$key" in
             operations) expected=1 ;;
             insert_rows) expected=$BULK_LOAD_ROWS ;;
-            insert_batches) expected=$expected_batches ;;
         esac
         actual=$(awk -v key="$key" '{ for (i=1; i<=NF; ++i) { split($i, pair, "="); if (pair[1] == key) print pair[2] } }' <<<"$counters")
         if [[ "$actual" != "$expected" ]]; then
@@ -321,7 +322,12 @@ report_bulk_lifecycle() {
             exit 1
         fi
     done
-    log "BULK_LIFECYCLE round=$round expected_batches=$expected_batches $counters"
+    actual=$(awk '{ for (i=1; i<=NF; ++i) { split($i, pair, "="); if (pair[1] == "insert_batches") print pair[2] } }' <<<"$counters")
+    if [[ ! "$actual" =~ ^[1-9][0-9]*$ ]] || (( actual < minimum_batches || actual > BULK_LOAD_ROWS )); then
+        echo "Unexpected SessionGateway insert_batches for bulk round $round: expected $minimum_batches..$BULK_LOAD_ROWS got ${actual:-missing}" >&2
+        exit 1
+    fi
+    log "BULK_LIFECYCLE round=$round minimum_batches=$minimum_batches actual_batches=$actual $counters"
 }
 
 # Execute EXASOL and assert counters emitted only by this round, preventing a
